@@ -20,7 +20,7 @@ class VersionTextNMSPacketEntity implements TextNMSPacketEntity {
     }
 
     @Override
-    public PacketGroup newSpawnPackets(PositionCoordinates position, String text) {
+    public PacketGroup newSpawnPackets(PositionCoordinates position, String text, boolean sneaking) {
         return EntityLivingSpawnNMSPacket.builder(armorStandID, EntityTypeID.ARMOR_STAND, position, ARMOR_STAND_Y_OFFSET)
                 .setArmorStandMarker()
                 .setCustomName(text)
@@ -28,7 +28,7 @@ class VersionTextNMSPacketEntity implements TextNMSPacketEntity {
     }
 
     @Override
-    public IndividualTextPacketGroup newSpawnPackets(PositionCoordinates position) {
+    public IndividualTextPacketGroup newSpawnPackets(PositionCoordinates position, boolean sneaking) {
         return IndividualTextPacketGroup.of(
                 (String text) -> EntityLivingSpawnNMSPacket.builder(armorStandID, EntityTypeID.ARMOR_STAND, position, ARMOR_STAND_Y_OFFSET)
                         .setArmorStandMarker()
@@ -38,7 +38,7 @@ class VersionTextNMSPacketEntity implements TextNMSPacketEntity {
     }
 
     @Override
-    public PacketGroup newChangePackets(String text) {
+    public PacketGroup newChangePackets(String text, boolean sneaking) {
         return EntityMetadataNMSPacket.builder(armorStandID)
                 .setCustomName(text)
                 .build();

@@ -23,6 +23,7 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
     private final TextNMSPacketEntity textEntity;
 
     private final DisplayText displayText;
+    private boolean sneaking;
     private boolean displayTextChanged;
 
     public TextLineTracker(
@@ -35,6 +36,7 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
         this.line = line;
         this.textEntity = nmsManager.newTextPacketEntity();
         this.displayText = new DisplayText(placeholderTracker);
+        this.sneaking = line.isSneaking();
     }
 
     @Override
@@ -67,6 +69,11 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
             this.displayTextChanged = true;
         }
 
+        if (line.isSneaking() != sneaking) {
+            sneaking = line.isSneaking();
+            this.displayTextChanged = true;
+        }
+
         boolean allowPlaceholders = line.isAllowPlaceholders();
         if (this.displayText.isAllowPlaceholders() != allowPlaceholders) {
             this.displayText.setAllowPlaceholders(allowPlaceholders);
@@ -86,7 +93,7 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
     protected void sendSpawnPackets(Viewers<TextLineViewer> viewers) {
         super.sendSpawnPackets(viewers);
 
-        IndividualTextPacketGroup spawnPackets = textEntity.newSpawnPackets(position);
+        IndividualTextPacketGroup spawnPackets = textEntity.newSpawnPackets(position, sneaking);
         viewers.forEach(viewer -> viewer.sendTextPackets(spawnPackets));
     }
 

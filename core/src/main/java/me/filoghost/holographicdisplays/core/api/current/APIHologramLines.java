@@ -25,10 +25,11 @@ class APIHologramLines extends BaseHologramLines<APIHologramLine> implements Hol
     }
 
     @Override
-    public @NotNull TextHologramLine appendText(@Nullable String text) {
+    public @NotNull TextHologramLine appendText(@Nullable String text, boolean sneaking) {
         checkNotDeleted();
 
         APITextHologramLine line = new APITextHologramLine(hologram, text);
+        line.setSneaking(sneaking);
         super.add(line);
         return line;
     }

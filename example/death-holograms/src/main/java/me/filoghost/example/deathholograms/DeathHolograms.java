@@ -41,8 +41,8 @@ public class DeathHolograms extends JavaPlugin implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         Hologram hologram = holographicDisplaysAPI.createHologram(event.getEntity().getEyeLocation());
 
-        hologram.getLines().appendText(ChatColor.RED + "Player " + ChatColor.GOLD + event.getEntity().getName() + ChatColor.RED + " died here!");
-        hologram.getLines().appendText(ChatColor.GRAY + "Time of death: " + TIME_FORMATTER.format(Instant.now()));
+        hologram.getLines().appendText(ChatColor.RED + "Player " + ChatColor.GOLD + event.getEntity().getName() + ChatColor.RED + " died here!", false);
+        hologram.getLines().appendText(ChatColor.GRAY + "Time of death: " + TIME_FORMATTER.format(Instant.now()), false);
     }
 
 }

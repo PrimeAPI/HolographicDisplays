@@ -361,28 +361,28 @@
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <reactorModuleConvergence />
-                                <requireMavenVersion>
-                                    <version>[3.6.0,)</version>
-                                </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <version>[16,)</version>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-enforcer-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>enforce</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <rules>-->
+<!--                                <reactorModuleConvergence />-->
+<!--                                <requireMavenVersion>-->
+<!--                                    <version>[3.6.0,)</version>-->
+<!--                                </requireMavenVersion>-->
+<!--                                <requireJavaVersion>-->
+<!--                                    <version>[16,)</version>-->
+<!--                                </requireJavaVersion>-->
+<!--                            </rules>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.commonjava.maven.plugins</groupId>
@@ -402,37 +402,37 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>8.42</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <consoleOutput>true</consoleOutput>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <configLocation>${rootDir}/checkstyle/checkstyle.xml</configLocation>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <propertyExpansion>samedir=${rootDir}/checkstyle</propertyExpansion>
-                    <sourceDirectories>
-                        <sourceDirectory>${project.basedir}</sourceDirectory>
-                    </sourceDirectories>
-                    <includes>checkstyle/**/*, pom.xml, src/main/java/**/*.java</includes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>checkstyle-check</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-checkstyle-plugin</artifactId>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>com.puppycrawl.tools</groupId>-->
+<!--                        <artifactId>checkstyle</artifactId>-->
+<!--                        <version>8.42</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--                <configuration>-->
+<!--                    <consoleOutput>true</consoleOutput>-->
+<!--                    &lt;!&ndash;suppress UnresolvedMavenProperty &ndash;&gt;-->
+<!--                    <configLocation>${rootDir}/checkstyle/checkstyle.xml</configLocation>-->
+<!--                    &lt;!&ndash;suppress UnresolvedMavenProperty &ndash;&gt;-->
+<!--                    <propertyExpansion>samedir=${rootDir}/checkstyle</propertyExpansion>-->
+<!--                    <sourceDirectories>-->
+<!--                        <sourceDirectory>${project.basedir}</sourceDirectory>-->
+<!--                    </sourceDirectories>-->
+<!--                    <includes>checkstyle/**/*, pom.xml, src/main/java/**/*.java</includes>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>checkstyle-check</id>-->
+<!--                        <phase>validate</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>check</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 

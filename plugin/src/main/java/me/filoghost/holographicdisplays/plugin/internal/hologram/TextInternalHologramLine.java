@@ -10,6 +10,7 @@ import me.filoghost.holographicdisplays.api.hologram.Hologram;
 public class TextInternalHologramLine extends InternalHologramLine {
 
     private final String text;
+    private boolean sneaking = false;
 
     public TextInternalHologramLine(String serializedString, String text) {
         super(serializedString);
@@ -18,7 +19,15 @@ public class TextInternalHologramLine extends InternalHologramLine {
 
     @Override
     public void appendTo(Hologram hologram) {
-        hologram.getLines().appendText(text);
+        hologram.getLines().appendText(text, sneaking);
+    }
+
+    public void setSneaking(boolean sneaking) {
+        this.sneaking = sneaking;
+    }
+
+    public boolean isSneaking() {
+        return sneaking;
     }
 
 }

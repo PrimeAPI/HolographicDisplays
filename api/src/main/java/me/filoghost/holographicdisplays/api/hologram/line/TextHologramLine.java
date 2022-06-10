@@ -28,4 +28,18 @@ public interface TextHologramLine extends ClickableHologramLine {
      */
     void setText(@Nullable String text);
 
+    /**
+     * Returns if the displaytext is transparent.
+     *
+     * @return true if the displaytext is transparent.
+     */
+    boolean isSneaking();
+
+    /**
+     * Sets if the displaytext is transparent.
+     *
+     * @param sneaking the new sneaking state.
+     */
+    void setSneaking(boolean sneaking);
+
 }

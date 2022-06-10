@@ -41,6 +41,13 @@ abstract class DataWatcherPacketBuilder<T> {
         return this;
     }
 
+    DataWatcherPacketBuilder<T> setSneaking(boolean sneaking) {
+        if (sneaking) {
+            packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ENTITY_STATUS, (byte) (0x02 | 0x20));
+        }
+        return this;
+    }
+
     private Optional<IChatBaseComponent> getCustomNameDataWatcherValue(String customName) {
         customName = Strings.truncate(customName, MAX_CUSTOM_NAME_LENGTH);
         if (!Strings.isEmpty(customName)) {

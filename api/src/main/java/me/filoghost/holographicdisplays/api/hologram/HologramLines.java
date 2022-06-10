@@ -26,7 +26,11 @@ public interface HologramLines {
      * @return the created line
      * @since 1
      */
-    @NotNull TextHologramLine appendText(@Nullable String text);
+    @NotNull TextHologramLine appendText(@Nullable String text, boolean sneaking);
+
+    default @NotNull TextHologramLine appendText(@Nullable String text) {
+        return appendText(text, false);
+    }
 
     /**
      * Adds a new item line at the end.

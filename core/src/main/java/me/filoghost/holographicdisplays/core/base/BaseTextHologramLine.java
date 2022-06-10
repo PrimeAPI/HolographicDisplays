@@ -13,10 +13,12 @@ import org.jetbrains.annotations.Nullable;
 public abstract class BaseTextHologramLine extends BaseClickableHologramLine {
 
     private String text;
+    private boolean sneaking;
 
     public BaseTextHologramLine(BaseHologram hologram, String text) {
         super(hologram);
         setText(text);
+        setSneaking(false);
     }
 
     public abstract boolean isAllowPlaceholders();
@@ -35,6 +37,14 @@ public abstract class BaseTextHologramLine extends BaseClickableHologramLine {
 
         this.text = text;
         setChanged();
+    }
+
+    public boolean isSneaking() {
+        return sneaking;
+    }
+
+    public void setSneaking(boolean sneaking) {
+        this.sneaking = sneaking;
     }
 
     @Override
