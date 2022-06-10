@@ -72,7 +72,6 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
         }
 
         if (line.isSneaking() != this.sneaking) {
-            Bukkit.broadcast("setting sneaking: " + line.isSneaking(), "debug");
             this.sneaking = line.isSneaking();
             this.displayTextChanged = true;
             this.sneakChange = true;
