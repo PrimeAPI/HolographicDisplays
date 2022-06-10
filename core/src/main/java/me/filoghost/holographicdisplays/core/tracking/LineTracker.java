@@ -7,8 +7,10 @@ package me.filoghost.holographicdisplays.core.tracking;
 
 import me.filoghost.holographicdisplays.common.PositionCoordinates;
 import me.filoghost.holographicdisplays.core.base.BaseHologramLine;
+import me.filoghost.holographicdisplays.core.base.BaseTextHologramLine;
 import me.filoghost.holographicdisplays.core.tick.CachedPlayer;
 import me.filoghost.holographicdisplays.core.tick.TickClock;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -202,6 +204,7 @@ public abstract class LineTracker<T extends Viewer> {
         if (positionChanged) {
             sendPositionChangePackets(viewers);
         }
+
     }
 
     protected abstract void sendPositionChangePackets(Viewers<T> viewers);

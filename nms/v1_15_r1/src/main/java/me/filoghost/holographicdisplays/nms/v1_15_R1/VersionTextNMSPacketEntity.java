@@ -49,7 +49,7 @@ class VersionTextNMSPacketEntity implements TextNMSPacketEntity {
     }
 
     @Override
-    public IndividualTextPacketGroup newChangePackets() {
+    public IndividualTextPacketGroup newChangePackets(boolean sneaking) {
         return IndividualTextPacketGroup.of(
                 (String text) -> EntityMetadataNMSPacket.builder(armorStandID)
                         .setCustomName(text)

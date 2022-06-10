@@ -44,7 +44,10 @@ public abstract class BaseTextHologramLine extends BaseClickableHologramLine {
     }
 
     public void setSneaking(boolean sneaking) {
+        checkNotDeleted();
+
         this.sneaking = sneaking;
+        setChanged();
     }
 
     @Override

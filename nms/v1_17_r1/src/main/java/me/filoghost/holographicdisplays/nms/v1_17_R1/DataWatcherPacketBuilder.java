@@ -44,6 +44,8 @@ abstract class DataWatcherPacketBuilder<T> {
     DataWatcherPacketBuilder<T> setSneaking(boolean sneaking) {
         if (sneaking) {
             packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ENTITY_STATUS, (byte) (0x02 | 0x20));
+        }else {
+            setInvisible();
         }
         return this;
     }

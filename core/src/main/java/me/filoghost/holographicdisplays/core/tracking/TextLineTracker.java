@@ -13,6 +13,7 @@ import me.filoghost.holographicdisplays.core.listener.LineClickListener;
 import me.filoghost.holographicdisplays.core.placeholder.tracking.ActivePlaceholderTracker;
 import me.filoghost.holographicdisplays.core.tick.CachedPlayer;
 import me.filoghost.holographicdisplays.core.tick.TickClock;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 
 import java.util.Objects;
@@ -25,6 +26,7 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
     private final DisplayText displayText;
     private boolean sneaking;
     private boolean displayTextChanged;
+    private boolean sneakChange = false;
 
     public TextLineTracker(
             BaseTextHologramLine line,
@@ -69,9 +71,11 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
             this.displayTextChanged = true;
         }
 
-        if (line.isSneaking() != sneaking) {
-            sneaking = line.isSneaking();
+        if (line.isSneaking() != this.sneaking) {
+            Bukkit.broadcast("setting sneaking: " + line.isSneaking(), "debug");
+            this.sneaking = line.isSneaking();
             this.displayTextChanged = true;
+            this.sneakChange = true;
         }
 
         boolean allowPlaceholders = line.isAllowPlaceholders();
@@ -86,6 +90,7 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
     protected void clearDetectedChanges() {
         super.clearDetectedChanges();
         this.displayTextChanged = false;
+        this.sneakChange = false;
     }
 
     @MustBeInvokedByOverriders
@@ -109,8 +114,12 @@ public class TextLineTracker extends ClickableLineTracker<TextLineViewer> {
         super.sendChangesPackets(viewers);
 
         if (displayTextChanged) {
-            IndividualTextPacketGroup changePackets = textEntity.newChangePackets();
-            viewers.forEach(viewer -> viewer.sendTextPacketsIfNecessary(changePackets));
+            IndividualTextPacketGroup changePackets = textEntity.newChangePackets(sneaking);
+            if (sneakChange) {
+                viewers.forEach(viewer -> viewer.sendTextPackets(changePackets));
+            } else {
+                viewers.forEach(viewer -> viewer.sendTextPacketsIfNecessary(changePackets));
+            }
         }
     }
 

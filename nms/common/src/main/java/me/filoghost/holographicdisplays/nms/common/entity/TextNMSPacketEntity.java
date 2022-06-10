@@ -20,7 +20,10 @@ public interface TextNMSPacketEntity extends NMSPacketEntity {
 
     PacketGroup newChangePackets(String text, boolean sneaking);
 
-    IndividualTextPacketGroup newChangePackets();
+    IndividualTextPacketGroup newChangePackets(boolean sneaking);
+    default IndividualTextPacketGroup newChangePackets() {
+        return newChangePackets(false);
+    }
 
 
 }
