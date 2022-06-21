@@ -60,6 +60,15 @@ abstract class DataWatcherPacketBuilder<T> {
         return this;
     }
 
+    DataWatcherPacketBuilder<T> setSneaking(boolean sneaking) {
+        if (sneaking) {
+            packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ENTITY_STATUS, (byte) (0x02 | 0x20));
+        }else {
+            setInvisible();
+        }
+        return this;
+    }
+
     T build() {
         packetByteBuffer.writeDataWatcherEntriesEnd();
         return createPacket(packetByteBuffer);
