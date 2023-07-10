@@ -5,9 +5,8 @@
  */
 package me.filoghost.holographicdisplays.core.base;
 
+import me.filoghost.holographicdisplays.core.CorePreconditions;
 import me.filoghost.holographicdisplays.nms.common.entity.TextNMSPacketEntity;
-import me.filoghost.holographicdisplays.core.tracking.LineTrackerManager;
-import me.filoghost.holographicdisplays.core.tracking.TextLineTracker;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseTextHologramLine extends BaseClickableHologramLine {
@@ -23,16 +22,12 @@ public abstract class BaseTextHologramLine extends BaseClickableHologramLine {
 
     public abstract boolean isAllowPlaceholders();
 
-    @Override
-    protected TextLineTracker createTracker(LineTrackerManager trackerManager) {
-        return trackerManager.startTracking(this);
-    }
-
     public @Nullable String getText() {
         return text;
     }
 
     public void setText(@Nullable String text) {
+        CorePreconditions.checkMainThread();
         checkNotDeleted();
 
         this.text = text;

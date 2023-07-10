@@ -5,6 +5,7 @@
  */
 package me.filoghost.holographicdisplays.core.base;
 
+import me.filoghost.holographicdisplays.core.CorePreconditions;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
@@ -20,6 +21,8 @@ public abstract class BaseHologramManager<H extends BaseHologram> {
     private final List<H> unmodifiableHologramsView = Collections.unmodifiableList(holograms);
 
     protected void addHologram(H hologram) {
+        CorePreconditions.checkMainThread();
+
         holograms.add(hologram);
     }
 
@@ -28,11 +31,15 @@ public abstract class BaseHologramManager<H extends BaseHologram> {
     }
 
     public void deleteHologram(H hologram) {
+        CorePreconditions.checkMainThread();
+
         hologram.setDeleted();
         holograms.remove(hologram);
     }
 
     public void deleteHologramsIf(Predicate<H> condition) {
+        CorePreconditions.checkMainThread();
+
         Iterator<H> iterator = holograms.iterator();
         while (iterator.hasNext()) {
             H hologram = iterator.next();
@@ -44,6 +51,8 @@ public abstract class BaseHologramManager<H extends BaseHologram> {
     }
 
     public void deleteHolograms() {
+        CorePreconditions.checkMainThread();
+
         Iterator<H> iterator = holograms.iterator();
         while (iterator.hasNext()) {
             H hologram = iterator.next();

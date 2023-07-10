@@ -9,6 +9,7 @@ import me.filoghost.holographicdisplays.common.PositionCoordinates;
 import me.filoghost.holographicdisplays.core.base.BaseHologramLine;
 import me.filoghost.holographicdisplays.core.base.BaseTextHologramLine;
 import me.filoghost.holographicdisplays.core.tick.CachedPlayer;
+import org.bukkit.GameMode;
 import me.filoghost.holographicdisplays.core.tick.TickClock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,22 +24,17 @@ import java.util.Objects;
 
 public abstract class LineTracker<T extends Viewer> {
 
-    private static final int MODIFY_VIEWERS_INTERVAL_TICKS = 5;
-
-    private final TickClock tickClock;
     private final Map<Player, T> viewers;
     private final Viewers<T> iterableViewers;
 
-    protected PositionCoordinates position;
+    private String positionWorldName;
+    protected PositionCoordinates positionCoordinates;
     private boolean positionChanged;
 
-    /**
-     * Flag to indicate that the line has changed in some way and there could be the need to send update packets.
-     */
-    private boolean lineChanged;
+    private boolean inLoadedChunk;
+    private int lastVisibilitySettingsVersion;
 
-    protected LineTracker(TickClock tickClock) {
-        this.tickClock = tickClock;
+    protected LineTracker() {
         this.viewers = new HashMap<>();
         this.iterableViewers = new DelegateViewers<>(viewers.values());
     }
@@ -54,17 +50,13 @@ public abstract class LineTracker<T extends Viewer> {
         resetViewersAndSendDestroyPackets();
     }
 
-    public final void setLineChanged() {
-        lineChanged = true;
-    }
-
     @MustBeInvokedByOverriders
-    protected void update(List<CachedPlayer> onlinePlayers) {
+    protected void update(List<CachedPlayer> onlinePlayers, List<CachedPlayer> movedPlayers, int maxViewRange) {
         boolean sendChangesPackets = false;
 
         // First, detect the changes if the flag is on and set it off
-        if (lineChanged) {
-            lineChanged = false;
+        if (getLine().hasChanged()) {
+            getLine().clearChanged();
             detectChanges();
             sendChangesPackets = true;
         }
@@ -77,28 +69,52 @@ public abstract class LineTracker<T extends Viewer> {
         }
 
         // Then, send the changes (if any) to already tracked players
-        if (sendChangesPackets) {
-            if (hasViewers()) {
-                sendChangesPackets(iterableViewers);
-            }
-            clearDetectedChanges();
+        if (sendChangesPackets && hasViewers()) {
+            sendChangesPackets(iterableViewers);
         }
 
-        // Finally, add/remove tracked players sending them the full spawn/destroy packets
-        modifyViewersAndSendPackets(onlinePlayers);
+        // Finally, add/remove viewers sending them the full spawn/destroy packets
+        modifyViewersAndSendPackets(onlinePlayers, movedPlayers, maxViewRange);
+
+        if (sendChangesPackets) {
+            clearDetectedChanges();
+        }
     }
 
     protected abstract boolean updatePlaceholders();
 
-    private void modifyViewersAndSendPackets(List<CachedPlayer> onlinePlayers) {
+    private void modifyViewersAndSendPackets(List<CachedPlayer> onlinePlayers, List<CachedPlayer> movedPlayers, int maxViewRange) {
         if (!getLine().isInLoadedChunk()) {
-            resetViewersAndSendDestroyPackets();
+            if (inLoadedChunk) {
+                inLoadedChunk = false;
+                resetViewersAndSendDestroyPackets();
+            }
             return;
         }
 
-        // Add the identity hash code to avoid updating all the lines at the same time
-        if ((tickClock.getCurrentTick() + hashCode()) % MODIFY_VIEWERS_INTERVAL_TICKS != 0) {
-            return;
+        boolean checkAllPlayers = false;
+
+        if (!inLoadedChunk) {
+            // The chunk was just loaded, check all players
+            inLoadedChunk = true;
+            checkAllPlayers = true;
+        }
+
+        int visibilitySettingsVersion = getLine().getVisibilitySettings().getVersion();
+        if (visibilitySettingsVersion != lastVisibilitySettingsVersion) {
+            lastVisibilitySettingsVersion = visibilitySettingsVersion;
+            checkAllPlayers = true;
+        }
+
+        if (positionChanged) {
+            checkAllPlayers = true;
+        }
+
+        List<CachedPlayer> playersToCheck;
+        if (checkAllPlayers) {
+            playersToCheck = onlinePlayers;
+        } else {
+            playersToCheck = movedPlayers;
         }
 
         // Lazy initialization
@@ -106,11 +122,11 @@ public abstract class LineTracker<T extends Viewer> {
         MutableViewers<T> removedPlayers = null;
 
         // Micro-optimization, don't use for-each loop to avoid creating a new Iterator (method called frequently)
-        int size = onlinePlayers.size();
+        int size = playersToCheck.size();
         for (int i = 0; i < size; i++) {
-            CachedPlayer player = onlinePlayers.get(i);
+            CachedPlayer player = playersToCheck.get(i);
             Player bukkitPlayer = player.getBukkitPlayer();
-            if (shouldTrackPlayer(player)) {
+            if (shouldTrackPlayer(player, maxViewRange)) {
                 if (!viewers.containsKey(bukkitPlayer)) {
                     T viewer = createViewer(player);
                     viewers.put(bukkitPlayer, viewer);
@@ -138,17 +154,22 @@ public abstract class LineTracker<T extends Viewer> {
         }
     }
 
-    private boolean shouldTrackPlayer(CachedPlayer player) {
+    private boolean shouldTrackPlayer(CachedPlayer player, int maxViewRange) {
         Location playerLocation = player.getLocation();
-        if (playerLocation.getWorld() != getLine().getWorldIfLoaded()) {
+        if (playerLocation == null || playerLocation.getWorld() != getLine().getWorldIfLoaded()) {
             return false;
         }
 
-        double diffX = Math.abs(playerLocation.getX() - position.getX());
-        double diffZ = Math.abs(playerLocation.getZ() - position.getZ());
+        double viewRange = getViewRange();
+        if (viewRange > maxViewRange) {
+            viewRange = maxViewRange;
+        }
 
-        return diffX <= getViewRange()
-                && diffZ <= getViewRange()
+        double diffX = Math.abs(playerLocation.getX() - positionCoordinates.getX());
+        double diffZ = Math.abs(playerLocation.getZ() - positionCoordinates.getZ());
+
+        return diffX <= viewRange
+                && diffZ <= viewRange
                 && getLine().isVisibleTo(player.getBukkitPlayer());
     }
 
@@ -164,7 +185,7 @@ public abstract class LineTracker<T extends Viewer> {
         return viewers.values();
     }
 
-    public final boolean isViewer(Player player) {
+    protected final boolean isViewer(Player player) {
         return viewers.containsKey(player);
     }
 
@@ -172,11 +193,25 @@ public abstract class LineTracker<T extends Viewer> {
         viewers.remove(player);
     }
 
+    protected boolean canInteract(Player player) {
+        return !getLine().isDeleted()
+                && player.isOnline()
+                && player.getGameMode() != GameMode.SPECTATOR
+                && isViewer(player)
+                && getLine().isVisibleTo(player);
+    }
+
     @MustBeInvokedByOverriders
     protected void detectChanges() {
-        PositionCoordinates position = getLine().getPosition();
-        if (!Objects.equals(this.position, position)) {
-            this.position = position;
+        PositionCoordinates positionCoordinates = getLine().getCoordinates();
+        if (!Objects.equals(this.positionCoordinates, positionCoordinates)) {
+            this.positionCoordinates = positionCoordinates;
+            this.positionChanged = true;
+        }
+
+        String positionWorldName = getLine().getWorldName();
+        if (!Objects.equals(this.positionWorldName, positionWorldName)) {
+            this.positionWorldName = positionWorldName;
             this.positionChanged = true;
         }
     }

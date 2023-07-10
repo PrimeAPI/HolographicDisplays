@@ -6,11 +6,12 @@
 package me.filoghost.holographicdisplays.core.tracking;
 
 import me.filoghost.holographicdisplays.common.PositionCoordinates;
-import me.filoghost.holographicdisplays.nms.common.NMSManager;
-import me.filoghost.holographicdisplays.nms.common.entity.ClickableNMSPacketEntity;
 import me.filoghost.holographicdisplays.core.base.BaseClickableHologramLine;
 import me.filoghost.holographicdisplays.core.listener.LineClickListener;
-import me.filoghost.holographicdisplays.core.tick.TickClock;
+import me.filoghost.holographicdisplays.nms.common.NMSManager;
+import me.filoghost.holographicdisplays.nms.common.entity.ClickableNMSPacketEntity;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 
 public abstract class ClickableLineTracker<T extends Viewer> extends LineTracker<T> {
@@ -22,21 +23,38 @@ public abstract class ClickableLineTracker<T extends Viewer> extends LineTracker
     private boolean spawnClickableEntity;
     private boolean spawnClickableEntityChanged;
 
-    public ClickableLineTracker(BaseClickableHologramLine line, NMSManager nmsManager, LineClickListener lineClickListener, TickClock tickClock) {
-        super(tickClock);
+    public ClickableLineTracker(BaseClickableHologramLine line, NMSManager nmsManager, LineClickListener lineClickListener) {
         this.clickableEntity = nmsManager.newClickablePacketEntity();
         this.positionOffsetY = (line.getHeight() - ClickableNMSPacketEntity.SLIME_HEIGHT) / 2;
         this.lineClickListener = lineClickListener;
     }
 
+    public void onClientClick(Player player) {
+        if (getLine().hasClickCallback() && canInteract(player) && isInClickRange(player)) {
+            getLine().onClick(player);
+        }
+    }
+
+    private boolean isInClickRange(Player player) {
+        Location playerLocation = player.getLocation();
+        PositionCoordinates positionCoordinates = getLine().getCoordinates();
+
+        double xDiff = playerLocation.getX() - positionCoordinates.getX();
+        double yDiff = playerLocation.getY() + 1.3 - positionCoordinates.getY(); // Use shoulder height
+        double zDiff = playerLocation.getZ() - positionCoordinates.getZ();
+
+        double distanceSquared = (xDiff * xDiff) + (yDiff * yDiff) + (zDiff * zDiff);
+        return distanceSquared < 5 * 5;
+    }
+
     @Override
-    protected abstract BaseClickableHologramLine getLine();
+    public abstract BaseClickableHologramLine getLine();
 
     @MustBeInvokedByOverriders
     @Override
     public void onRemoval() {
         super.onRemoval();
-        lineClickListener.unregisterLine(clickableEntity.getID());
+        lineClickListener.removeLineTracker(clickableEntity.getID());
     }
 
     @MustBeInvokedByOverriders
@@ -49,9 +67,9 @@ public abstract class ClickableLineTracker<T extends Viewer> extends LineTracker
             this.spawnClickableEntity = spawnClickableEntity;
             this.spawnClickableEntityChanged = true;
             if (spawnClickableEntity) {
-                lineClickListener.registerLine(clickableEntity.getID(), getLine());
+                lineClickListener.addLineTracker(clickableEntity.getID(), this);
             } else {
-                lineClickListener.unregisterLine(clickableEntity.getID());
+                lineClickListener.removeLineTracker(clickableEntity.getID());
             }
         }
     }
@@ -102,7 +120,7 @@ public abstract class ClickableLineTracker<T extends Viewer> extends LineTracker
     }
 
     private PositionCoordinates getClickableEntityPosition() {
-        return position.addY(positionOffsetY);
+        return positionCoordinates.addY(positionOffsetY);
     }
 
 }

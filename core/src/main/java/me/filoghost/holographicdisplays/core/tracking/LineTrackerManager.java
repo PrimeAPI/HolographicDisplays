@@ -5,13 +5,13 @@
  */
 package me.filoghost.holographicdisplays.core.tracking;
 
-import me.filoghost.holographicdisplays.nms.common.NMSManager;
 import me.filoghost.holographicdisplays.core.base.BaseItemHologramLine;
 import me.filoghost.holographicdisplays.core.base.BaseTextHologramLine;
+import me.filoghost.holographicdisplays.core.base.EditableHologramLine;
 import me.filoghost.holographicdisplays.core.listener.LineClickListener;
 import me.filoghost.holographicdisplays.core.placeholder.tracking.ActivePlaceholderTracker;
 import me.filoghost.holographicdisplays.core.tick.CachedPlayer;
-import me.filoghost.holographicdisplays.core.tick.TickClock;
+import me.filoghost.holographicdisplays.nms.common.NMSManager;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
@@ -21,7 +21,6 @@ import java.util.List;
 
 public class LineTrackerManager {
 
-    private final TickClock tickClock;
     private final NMSManager nmsManager;
     private final ActivePlaceholderTracker placeholderTracker;
     private final LineClickListener lineClickListener;
@@ -30,28 +29,24 @@ public class LineTrackerManager {
     public LineTrackerManager(
             NMSManager nmsManager,
             ActivePlaceholderTracker placeholderTracker,
-            LineClickListener lineClickListener,
-            TickClock tickClock) {
+            LineClickListener lineClickListener) {
         this.nmsManager = nmsManager;
         this.placeholderTracker = placeholderTracker;
         this.lineClickListener = lineClickListener;
         this.lineTrackers = new LinkedList<>();
-        this.tickClock = tickClock;
     }
 
-    public TextLineTracker startTracking(BaseTextHologramLine line) {
-        TextLineTracker tracker = new TextLineTracker(line, nmsManager, lineClickListener, placeholderTracker, tickClock);
-        lineTrackers.add(tracker);
-        return tracker;
+    public <T extends EditableHologramLine> void startTracking(T line) {
+        if (line instanceof BaseTextHologramLine) {
+            lineTrackers.add(new TextLineTracker((BaseTextHologramLine) line, nmsManager, lineClickListener, placeholderTracker));
+        } else if (line instanceof BaseItemHologramLine) {
+            lineTrackers.add(new ItemLineTracker((BaseItemHologramLine) line, nmsManager, lineClickListener));
+        } else {
+            throw new UnsupportedOperationException("unsupported line class: " + line.getClass().getName());
+        }
     }
 
-    public ItemLineTracker startTracking(BaseItemHologramLine line) {
-        ItemLineTracker tracker = new ItemLineTracker(line, nmsManager, lineClickListener, tickClock);
-        lineTrackers.add(tracker);
-        return tracker;
-    }
-
-    public void update(List<CachedPlayer> onlinePlayers) {
+    public void update(List<CachedPlayer> onlinePlayers, List<CachedPlayer> movedPlayers, int maxViewRange) {
         Iterator<LineTracker<?>> iterator = lineTrackers.iterator();
         while (iterator.hasNext()) {
             LineTracker<?> lineTracker = iterator.next();
@@ -63,7 +58,7 @@ public class LineTrackerManager {
                 continue;
             }
 
-            lineTracker.update(onlinePlayers);
+            lineTracker.update(onlinePlayers, movedPlayers, maxViewRange);
         }
     }
 

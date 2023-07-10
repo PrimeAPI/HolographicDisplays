@@ -9,6 +9,7 @@ import me.filoghost.fcommons.Preconditions;
 import me.filoghost.holographicdisplays.api.Position;
 import me.filoghost.holographicdisplays.api.hologram.Hologram;
 import me.filoghost.holographicdisplays.api.hologram.PlaceholderSetting;
+import me.filoghost.holographicdisplays.core.CorePreconditions;
 import me.filoghost.holographicdisplays.core.base.BaseHologram;
 import me.filoghost.holographicdisplays.core.base.ImmutablePosition;
 import me.filoghost.holographicdisplays.core.tracking.LineTrackerManager;
@@ -30,7 +31,7 @@ class APIHologram extends BaseHologram implements Hologram {
             LineTrackerManager lineTrackerManager) {
         super(position, lineTrackerManager);
         Preconditions.notNull(plugin, "plugin");
-        this.lines = new APIHologramLines(this);
+        this.lines = new APIHologramLines(this, lineTrackerManager);
         this.plugin = plugin;
         this.hologramManager = hologramManager;
         this.placeholderSetting = PlaceholderSetting.DEFAULT;
@@ -53,6 +54,7 @@ class APIHologram extends BaseHologram implements Hologram {
 
     @Override
     public void setPlaceholderSetting(@NotNull PlaceholderSetting placeholderSetting) {
+        CorePreconditions.checkMainThread();
         Preconditions.notNull(placeholderSetting, "placeholderSetting");
         checkNotDeleted();
 

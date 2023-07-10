@@ -20,9 +20,14 @@ import java.util.Map;
 public class Settings {
 
     public static double spaceBetweenLines;
+    public static int viewRange;
     public static boolean quickEditCommands;
     public static DateTimeFormatter timeFormat;
     public static boolean updateNotification;
+
+    public static boolean placeholderAPIEnabled;
+    public static boolean placeholderAPIExpandShortFormat;
+    public static int placeholderAPIDefaultRefreshInternalTicks;
 
     public static String imageSymbol;
     public static String transparencySymbol;
@@ -39,9 +44,14 @@ public class Settings {
 
     public static void load(SettingsModel config, ErrorCollector errorCollector) {
         spaceBetweenLines = config.spaceBetweenLines;
+        viewRange = config.viewRange;
         quickEditCommands = config.quickEditCommands;
         timeFormat = parseTimeFormatter(config.timeFormat, config.timeZone, errorCollector);
         updateNotification = config.updateNotification;
+
+        placeholderAPIEnabled = config.placeholderAPIEnabled;
+        placeholderAPIExpandShortFormat = config.placeholderAPIShortFormat;
+        placeholderAPIDefaultRefreshInternalTicks = config.placeholderAPIDefaultRefreshIntervalTicks;
 
         imageSymbol = DisplayFormat.apply(config.imageRenderingSolidPixel);
         transparencySymbol = DisplayFormat.apply(config.imageRenderingTransparentPixel);

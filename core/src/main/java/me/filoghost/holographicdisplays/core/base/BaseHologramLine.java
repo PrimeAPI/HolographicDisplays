@@ -7,9 +7,7 @@ package me.filoghost.holographicdisplays.core.base;
 
 import me.filoghost.fcommons.Preconditions;
 import me.filoghost.holographicdisplays.common.PositionCoordinates;
-import me.filoghost.holographicdisplays.core.tracking.LineTracker;
-import me.filoghost.holographicdisplays.core.tracking.LineTrackerManager;
-import org.bukkit.GameMode;
+import me.filoghost.holographicdisplays.core.api.current.DefaultVisibilitySettings;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -19,37 +17,47 @@ import org.jetbrains.annotations.Nullable;
 public abstract class BaseHologramLine extends BaseHologramComponent implements EditableHologramLine {
 
     private final BaseHologram hologram;
-    private final LineTracker<?> tracker;
 
-    private PositionCoordinates position;
+    private PositionCoordinates coordinates;
+
+    /**
+     * Flag to indicate that the line has changed in some way and update packets might be necessary.
+     */
+    private boolean changed;
 
     protected BaseHologramLine(BaseHologram hologram) {
         Preconditions.notNull(hologram, "hologram");
         this.hologram = hologram;
-        this.tracker = createTracker(hologram.getTrackerManager());
+        setChanged(); // Force the initial refresh
     }
 
-    protected abstract LineTracker<?> createTracker(LineTrackerManager trackerManager);
+    public boolean hasChanged() {
+        return changed;
+    }
 
     public final void setChanged() {
-        tracker.setLineChanged();
+        changed = true;
     }
 
-    protected final boolean isViewer(Player player) {
-        return tracker.isViewer(player);
+    public void clearChanged() {
+        changed = false;
     }
 
     @Override
-    public final void setPosition(double x, double y, double z) {
-        position = new PositionCoordinates(x, y, z);
+    public final void setCoordinates(double x, double y, double z) {
+        coordinates = new PositionCoordinates(x, y, z);
         setChanged();
     }
 
-    public @NotNull PositionCoordinates getPosition() {
-        if (position == null) {
+    public @NotNull PositionCoordinates getCoordinates() {
+        if (coordinates == null) {
             throw new IllegalStateException("position not set");
         }
-        return position;
+        return coordinates;
+    }
+
+    public @NotNull String getWorldName() {
+        return hologram.getPosition().getWorldName();
     }
 
     public @Nullable World getWorldIfLoaded() {
@@ -68,12 +76,8 @@ public abstract class BaseHologramLine extends BaseHologramComponent implements 
         return hologram.getCreatorPlugin();
     }
 
-    protected boolean canInteract(Player player) {
-        return !isDeleted()
-                && player.isOnline()
-                && player.getGameMode() != GameMode.SPECTATOR
-                && isViewer(player)
-                && isVisibleTo(player);
+    public final DefaultVisibilitySettings getVisibilitySettings() {
+        return hologram.getVisibilitySettings();
     }
 
 }

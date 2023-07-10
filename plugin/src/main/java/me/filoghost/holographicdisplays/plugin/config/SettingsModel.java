@@ -18,14 +18,26 @@ public class SettingsModel implements MappedConfig {
     @Path("space-between-lines")
     double spaceBetweenLines = 0.02;
 
+    @Path("holograms-view-range")
+    int viewRange = 48;
+
     @Path("quick-edit-commands")
     boolean quickEditCommands = true;
 
+    @Path("placeholders.PlaceholderAPI.enabled")
+    boolean placeholderAPIEnabled = true;
+
+    @Path("placeholders.PlaceholderAPI.expand-short-format")
+    boolean placeholderAPIShortFormat = true;
+
+    @Path("placeholders.PlaceholderAPI.default-refresh-interval-ticks")
+    int placeholderAPIDefaultRefreshIntervalTicks = 200;
+
     @Path("image-rendering.solid-pixel")
-    String imageRenderingSolidPixel = "\\u2588";
+    String imageRenderingSolidPixel = "\u2588";
 
     @Path("image-rendering.transparent-pixel")
-    String imageRenderingTransparentPixel = "&7 \\u23B9 ";
+    String imageRenderingTransparentPixel = "&7 \u23B9 ";
 
     @Path("bungee.refresh-seconds")
     int bungeeRefreshSeconds = 3;

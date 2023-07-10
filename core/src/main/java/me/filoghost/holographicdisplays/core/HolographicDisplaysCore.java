@@ -16,7 +16,6 @@ import me.filoghost.holographicdisplays.core.api.current.DefaultHolographicDispl
 import me.filoghost.holographicdisplays.core.api.v2.V2HologramManager;
 import me.filoghost.holographicdisplays.core.api.v2.V2HologramsAPIProvider;
 import me.filoghost.holographicdisplays.core.base.BaseHologram;
-import me.filoghost.holographicdisplays.core.base.BaseHologramLines;
 import me.filoghost.holographicdisplays.core.listener.ChunkListener;
 import me.filoghost.holographicdisplays.core.listener.LineClickListener;
 import me.filoghost.holographicdisplays.core.listener.PlayerListener;
@@ -41,7 +40,7 @@ public class HolographicDisplaysCore {
         try {
             nmsManager = NMSVersion.getCurrent().createNMSManager(errorCollector);
         } catch (UnknownVersionException e) {
-            throw new PluginEnableException("Holographic Displays only supports Spigot from 1.8 to 1.18.2.");
+            throw new PluginEnableException("Holographic Displays only supports Spigot from 1.8 to 1.20.");
         } catch (OutdatedVersionException e) {
             throw new PluginEnableException("Holographic Displays only supports " + e.getMinimumSupportedVersion() + " and above.");
         } catch (Throwable t) {
@@ -52,7 +51,7 @@ public class HolographicDisplaysCore {
         TickClock tickClock = new TickClock();
         ActivePlaceholderTracker placeholderTracker = new ActivePlaceholderTracker(placeholderRegistry, tickClock);
         LineClickListener lineClickListener = new LineClickListener();
-        lineTrackerManager = new LineTrackerManager(nmsManager, placeholderTracker, lineClickListener, tickClock);
+        lineTrackerManager = new LineTrackerManager(nmsManager, placeholderTracker, lineClickListener);
         apiHologramManager = new APIHologramManager(lineTrackerManager);
         v2HologramManager = new V2HologramManager(lineTrackerManager);
 
@@ -81,13 +80,17 @@ public class HolographicDisplaysCore {
     }
 
     public void setSpaceBetweenHologramLines(double spaceBetweenLines) {
-        BaseHologramLines.spaceBetweenLines = spaceBetweenLines;
+        CoreGlobalConfig.spaceBetweenLines = spaceBetweenLines;
         for (BaseHologram hologram : apiHologramManager.getHolograms()) {
             hologram.getLines().updatePositions();
         }
         for (BaseHologram hologram : v2HologramManager.getHolograms()) {
             hologram.getLines().updatePositions();
         }
+    }
+
+    public void setMaxViewRange(int maxViewRange) {
+        CoreGlobalConfig.maxViewRange = maxViewRange;
     }
 
     public void disable() {
